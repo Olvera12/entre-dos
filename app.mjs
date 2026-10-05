@@ -1,6 +1,7 @@
 import { bytes64, pack, unpack, invitation, signalFromInput, description, encryptAnswer, decryptAnswer,
   fingerprint, channelCipher, control, readControl, fileOffer, safeName, CHUNK, MEMORY_LIMIT } from './security.mjs';
 import { Sha256 } from './hash.mjs';
+import { relayServers, peerConfiguration } from './network.mjs';
 
 const $ = id => document.getElementById(id);
 let strings, language = 'es_mx', statusKey = 'idle', noticeKey;
@@ -87,14 +88,15 @@ async function closeSession() {
   if(partial?.writer)await partial.writer.abort().catch(()=>{});
   for(const url of downloads)URL.revokeObjectURL(url);downloads.clear();retainedBytes=0;
   $('files').value='';$('files').disabled=false;$('completed').replaceChildren();
-  for(const id of ['invite-link','answer-input','offer-input','answer-link'])$(id).value='';
+  for(const id of ['invite-link','answer-input','offer-input','answer-link','relay-input'])$(id).value='';
   for(const id of ['receiver-setup','sender-setup','invite-output','answer-output','connected','incoming','transfer','session-actions'])show(id,false);
   show('home',true);$('workspace-title').textContent=t('choose');status('idle');
   sendQueue=Promise.resolve();receiveQueue=Promise.resolve();role=null;
   queuedFrames=0;$('remote-network').disabled=false;
+  show('relay-options',true);
 }
 async function fatal(error) {
-  const known=['badCode','expired','badFile','protocol','timeout','disconnected','memoryLimit','integrity','network','unavailable','disk'];
+  const known=['badCode','expired','badFile','badRelay','relayUnavailable','protocol','timeout','disconnected','memoryLimit','integrity','network','unavailable','disk'];
   const key=known.includes(error?.message)?error.message:error?.name==='AbortError'?'cancelled':'unavailable';
   await closeSession();notice(key);status('error','error');
 }
@@ -106,7 +108,7 @@ function setup(selectedRole) {
 async function createPeer() {
   if(!window.isSecureContext||!window.RTCPeerConnection||!crypto.subtle)throw new Error('unavailable');
   const currentEpoch=epoch;
-  pc=new RTCPeerConnection({iceServers:offer?.remote===false||!$('remote-network').checked?[]:[{urls:'stun:stun.l.google.com:19302'}]});
+  pc=new RTCPeerConnection(await peerConfiguration(offer));
   pc.addEventListener('connectionstatechange',()=>{
     if(currentEpoch!==epoch||stopped)return;
     if(pc.connectionState==='failed')void fatal(new Error('network'));
@@ -148,14 +150,21 @@ async function gather() {
   if(connection.iceGatheringState!=='complete')await new Promise(resolve=>{
     const finish=()=>{connection.removeEventListener('icegatheringstatechange',changed);clearTimeout(timer);resolve();};
     const changed=()=>{if(connection.iceGatheringState==='complete')finish();};
-    const timer=setTimeout(finish,8000);connection.addEventListener('icegatheringstatechange',changed);
+    // Safari y redes restrictivas pueden tardar más que ocho segundos en descubrir una ruta.
+    const timer=setTimeout(finish,20000);connection.addEventListener('icegatheringstatechange',changed);
   });
   if(currentEpoch!==epoch||stopped)throw new Error('disconnected');
+  if(offer.remote!==false&&relayServers(offer.iceServers).some(item=>item.urls.some(url=>/^turns?:/i.test(url)))&&
+      !/ typ relay(?:\s|$)/m.test(connection.localDescription.sdp))throw new Error('relayUnavailable');
   return {type:connection.localDescription.type,sdp:connection.localDescription.sdp};
 }
 async function createInvitation() {
   if(pc)return;
-  offer={v:1,id:crypto.randomUUID(),key:bytes64(crypto.getRandomValues(new Uint8Array(32))),until:Date.now()+15*60*1000,remote:$('remote-network').checked};
+  const configured=relayServers($('relay-input').value.trim());
+  if(configured.length&&!configured.some(item=>item.urls.some(url=>/^turns?:/i.test(url))))throw new Error('badRelay');
+  offer={v:1,id:crypto.randomUUID(),key:bytes64(crypto.getRandomValues(new Uint8Array(32))),until:Date.now()+15*60*1000,remote:$('remote-network').checked,
+    ...(configured.length?{iceServers:configured}:{})};
+  $('relay-input').value='';show('relay-options',false);status('findingRoute');
   cipher=await channelCipher(offer,role);
   await createPeer();await pc.setLocalDescription(await pc.createOffer());
   offer.desc=await gather();
@@ -173,6 +182,7 @@ async function joinInvitation() {
   const parsed=unpack(signalFromInput($('offer-input').value,'invite'));
   offer={...invitation(parsed),remote:parsed.remote!==false};
   $('offer-input').value='';cipher=await channelCipher(offer,role);
+  status('findingRoute');
   await createPeer();await pc.setRemoteDescription(description(offer.desc,'offer'));
   await pc.setLocalDescription(await pc.createAnswer());
   $('answer-link').value=linkFor('answer',await encryptAnswer(offer,await gather()));
@@ -183,7 +193,7 @@ async function acceptAnswer() {
   const answer=await decryptAnswer(offer,signalFromInput($('answer-input').value,'answer'));
   $('answer-input').value='';await pc.setRemoteDescription(answer);status('connecting');
   const currentEpoch=epoch;
-  setTimeout(()=>{if(currentEpoch===epoch&&!established&&!stopped)notice('network');},30000);
+  setTimeout(()=>{if(currentEpoch===epoch&&!established&&!stopped)notice('network');},45000);
 }
 async function handleControl(message) {
   if(!message||typeof message.type!=='string')throw new Error('protocol');

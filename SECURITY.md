@@ -35,7 +35,7 @@ El host sirve JavaScript que necesariamente puede leer el archivo elegido antes 
 
 La app no analiza la estructura real ni busca malware en el archivo: una extensión permitida no acredita un contenido seguro. Reciban archivos sólo de su pareja y mantengan sus programas actualizados. El límite de tamaño y de cola reduce consumo accidental o malicioso, pero no convierte esta app en un servicio público resistente a abuso.
 
-La conexión directa revela datos de red entre ambos y no funciona con todas las NAT. No usa un servidor TURN; por tanto no hay un tercero que almacene o retransmita los archivos como parte de esta app, pero tampoco una garantía de conexión global.
+La conexión directa revela datos de red entre ambos y no funciona con todas las NAT. Por defecto no usa TURN. Si el dueño configura credenciales de transporte por sesión, un relay retransmite paquetes cifrados: puede observar IP, tiempo y volumen de tráfico, pero no recibe las claves AES del contenido mediante esta función. No se garantiza conexión global.
 
 Conservar el original conserva metadatos y ubicación. Cerrar la sesión no borra archivos ya guardados, registros del chat, sincronización de Fotos/iCloud/OneDrive ni copias del sistema. El consentimiento para enviar y recibir debe existir entre ambos; el receptor controla qué hace después con su copia.
 
@@ -44,3 +44,11 @@ GitHub Pages aloja solamente la interfaz pública. No se guardan ni se publican 
 ## Comprobaciones pendientes antes del uso habitual
 
 Prueben primero con un video no privado, en Safari del iPhone real y Chrome/Edge de la computadora. Confirmen que el guardado nativo, el formato y tamaño originales, el código de sesión y la verificación final funcionan en sus redes. Comprueben también el comportamiento al bloquear el teléfono: iOS puede suspender Safari y detener el envío. No se promete transferencia en segundo plano.
+
+## TURN opcional por sesión
+
+La configuración del dueño se valida antes de usarla y en el iPhone al abrir la invitación. Se limita a listas iceServers con esquemas STUN/TURN, puertos válidos y proveedores Metered/Cloudflare permitidos. Campos de administración como API Key se rechazan. No se obtiene configuración de URLs externas introducidas por una invitación. No se añaden permisos de cámara o micrófono ni scripts de terceros.
+
+Las credenciales de transporte se incluyen en el fragmento privado de la invitación, sólo para esta sesión, y deben tratarse como secretos de cuota. Deben tener vencimiento y restricciones cuando el proveedor lo permita. Nunca se publican en el repositorio ni se guardan en el navegador. Un relay no convierte el alojamiento del código en una frontera de confianza distinta: la app y dispositivos siguen teniendo acceso al original.
+
+El sondeo de las credenciales estáticas públicas antiguas de Open Relay no obtuvo una ruta en esta computadora; esas credenciales no se incorporaron al producto. El soporte añadido debe probarse con las credenciales vigentes de la cuenta propia, antes de usar archivos privados.

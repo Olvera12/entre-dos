@@ -34,6 +34,11 @@
         <ol class="steps"><li><span>01</span><div><h3 data-i18n="inviteTitle">Invita a tu pareja</h3><p data-i18n="inviteHint">Envíale la invitación por un chat privado. Expira en 15 minutos y sólo sirve para esta conexión.</p></div></li></ol>
         <label class="switch-row"><input id="remote-network" type="checkbox" checked><span data-i18n="remote">Estamos en redes diferentes</span></label>
         <p class="small" data-i18n="remoteHint">Usa un servicio STUN de Google para encontrar la conexión. Conoce su IP y la hora de la consulta, pero no recibe sus archivos.</p>
+        <details id="relay-options"><summary data-i18n="relayTitle">Si sus redes no conectan: retransmisión cifrada</summary>
+          <p class="small" data-i18n="relayHint">Requiere credenciales de transporte de una cuenta gratuita. El servidor ve IP y tráfico cifrado; no puede leer sus archivos. No pegues claves de administración o API.</p>
+          <label for="relay-input" data-i18n="relayLabel">Configuración iceServers de tu proveedor</label>
+          <textarea id="relay-input" rows="4" spellcheck="false" autocomplete="off"></textarea>
+          <p class="small" data-i18n="relayPrivate">Sólo vive en esta sesión y se comparte con el iPhone dentro de la invitación privada. No se guarda en GitHub.</p></details>
         <button id="create" class="primary" data-i18n="create">Crear invitación privada</button>
         <div id="invite-output" hidden><label for="invite-link" data-i18n="invitation">Tu invitación privada</label><textarea id="invite-link" readonly rows="3" spellcheck="false" autocomplete="off"></textarea>
           <button id="copy-invite" class="secondary" data-i18n="copyInvite">Copiar invitación</button><p class="small" data-i18n="keepTab">Mantén esta pestaña abierta. No reenvíes la invitación a nadie más.</p>

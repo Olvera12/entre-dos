@@ -1,4 +1,5 @@
 // Las claves viven sólo en memoria; la invitación es un secreto de acceso temporal.
+import {relayServers} from './network.mjs';
 const encoder = new TextEncoder();
 const decoder = new TextDecoder('utf-8', { fatal: true });
 export const MAX_FILE = 20 * 1024 ** 3;
@@ -43,7 +44,8 @@ export function invitation(value, now = Date.now()) {
   if (!value || value.v !== 1 || !/^[a-f0-9-]{36}$/i.test(value.id) ||
       !Number.isSafeInteger(value.until) || value.until <= now || value.until > now + 16*60*1000 ||
       typeof value.key !== 'string' || from64(value.key, 50).length !== 32) throw new Error('expired');
-  return { v: 1, id: value.id, until: value.until, key: value.key, desc: description(value.desc, 'offer') };
+  return { v: 1, id: value.id, until: value.until, key: value.key, desc: description(value.desc, 'offer'),
+    ...(value.iceServers?{iceServers:relayServers(value.iceServers)}:{}) };
 }
 export function safeName(name) {
   if (typeof name !== 'string' || name.length > 200) throw new Error('badFile');
