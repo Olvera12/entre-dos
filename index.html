@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="es-MX">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self'; font-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'; media-src 'none'; worker-src 'none'">
+  <meta name="description" content="Transferencias privadas de archivos originales entre dos dispositivos.">
+  <title>Entre dos · originales, en privado</title>
+  <link rel="stylesheet" href="./style.css">
+  <script type="module" src="./app.mjs"></script>
+</head>
+<body>
+  <header class="topbar"><a class="brand" href="./"><span class="brand-mark" aria-hidden="true">↗</span> entre dos<span class="brand-dot">.</span></a>
+    <div class="top-actions"><span class="private-label" data-i18n="private">TRANSFERENCIA PRIVADA</span>
+      <label class="sr-only" for="language" data-i18n="language">Idioma</label>
+      <select id="language"><option value="es_mx">ES</option><option value="en_us">EN</option></select></div>
+  </header>
+  <main>
+    <section class="hero"><div><p class="eyebrow" data-i18n="eyebrow">DE SU IPHONE A TU COMPUTADORA</p>
+      <h1 data-i18n="title">Sus momentos.<br>Tal como los grabó.</h1>
+      <p class="intro" data-i18n="intro">Videos y fotos originales, directo entre ustedes. Sin comprimir, sin cuentas y sin guardar los archivos en una nube.</p>
+      <div class="benefits"><span data-i18n="original">Calidad original</span><span data-i18n="encrypted">Cifrado de extremo a extremo</span><span data-i18n="free">Gratis</span></div>
+    </div><div class="connection-art" aria-hidden="true"><div class="device phone">↗<small>IPHONE</small></div><div class="orbit"><span>✦</span><small>entre dos</small></div><div class="device desktop">↙<small>COMPUTADORA</small></div></div></section>
+    <div id="notice" class="notice" role="status" aria-live="polite" hidden></div>
+    <section class="workspace">
+      <div class="workspace-head"><div><p class="eyebrow" data-i18n="session">UNA CONEXIÓN, DOS PERSONAS</p><h2 id="workspace-title" data-i18n="choose">¿En qué dispositivo estás?</h2></div>
+        <span id="status" class="status" data-state="idle" data-i18n="idle">Sin conexión</span></div>
+      <div id="home" class="role-grid">
+        <button id="receive-role" class="role"><span class="role-icon" aria-hidden="true">▣</span><strong data-i18n="computer">En mi computadora</strong><span data-i18n="computerHint">Recibir y guardar los originales</span><em data-i18n="startReceive">Crear una invitación ↗</em></button>
+        <button id="send-role" class="role"><span class="role-icon" aria-hidden="true">▯</span><strong data-i18n="phone">En mi iPhone</strong><span data-i18n="phoneHint">Enviar fotos y videos desde Archivos</span><em data-i18n="startSend">Tengo una invitación ↗</em></button>
+      </div>
+      <section id="receiver-setup" hidden>
+        <ol class="steps"><li><span>01</span><div><h3 data-i18n="inviteTitle">Invita a tu pareja</h3><p data-i18n="inviteHint">Envíale la invitación por un chat privado. Expira en 15 minutos y sólo sirve para esta conexión.</p></div></li></ol>
+        <label class="switch-row"><input id="remote-network" type="checkbox" checked><span data-i18n="remote">Estamos en redes diferentes</span></label>
+        <p class="small" data-i18n="remoteHint">Usa un servicio STUN de Google para encontrar la conexión. Conoce su IP y la hora de la consulta, pero no recibe sus archivos.</p>
+        <button id="create" class="primary" data-i18n="create">Crear invitación privada</button>
+        <div id="invite-output" hidden><label for="invite-link" data-i18n="invitation">Tu invitación privada</label><textarea id="invite-link" readonly rows="3" spellcheck="false" autocomplete="off"></textarea>
+          <button id="copy-invite" class="secondary" data-i18n="copyInvite">Copiar invitación</button><p class="small" data-i18n="keepTab">Mantén esta pestaña abierta. No reenvíes la invitación a nadie más.</p>
+          <ol class="steps"><li><span>02</span><div><h3 data-i18n="answerTitle">Pega su respuesta</h3><p data-i18n="answerHint">Ella abrirá la invitación y te enviará una respuesta para conectar los dispositivos.</p></div></li></ol>
+          <label for="answer-input" data-i18n="answer">Respuesta del iPhone</label><textarea id="answer-input" rows="3" spellcheck="false" autocomplete="off"></textarea>
+          <button id="connect" class="primary" data-i18n="connect">Conectar dispositivos</button></div>
+      </section>
+      <section id="sender-setup" hidden><ol class="steps"><li><span>01</span><div><h3 data-i18n="openInvite">Abre la invitación</h3><p data-i18n="openInviteHint">Usa Safari. Si no abriste el enlace directamente, pégalo aquí.</p></div></li></ol>
+        <label for="offer-input" data-i18n="invitation">Tu invitación privada</label><textarea id="offer-input" rows="3" spellcheck="false" autocomplete="off"></textarea>
+        <button id="join" class="primary" data-i18n="join">Conectar mi iPhone</button>
+        <div id="answer-output" hidden><label for="answer-link" data-i18n="yourAnswer">Tu respuesta de conexión</label><textarea id="answer-link" readonly rows="3" spellcheck="false" autocomplete="off"></textarea><button id="copy-answer" class="secondary" data-i18n="copyAnswer">Copiar respuesta</button><p class="small" data-i18n="sendAnswer">Envíala por el mismo chat privado y espera a que él la pegue. Mantén Safari abierto.</p></div>
+      </section>
+      <section id="connected" hidden>
+        <div class="verification"><span aria-hidden="true">✓</span><div><strong data-i18n="verify">Comprueben este código por su chat privado</strong><p><code id="fingerprint"></code> <span data-i18n="verifyHint">Debe verse igual en los dos dispositivos.</span></p></div></div>
+        <div id="send-panel" hidden><div class="iphone-tip"><strong data-i18n="iphoneTitle">En iPhone: selecciona desde Archivos</strong><p data-i18n="iphoneHint">Exporta el original desde Fotos a Archivos antes de enviarlo. La app conserva exactamente el archivo seleccionado; no puede deshacer una conversión previa de iOS.</p></div>
+          <label class="dropzone" for="files"><span aria-hidden="true">↑</span><strong data-i18n="selectFiles">Elegir videos o fotos</strong><small data-i18n="selectHint">Originales MOV, MP4, HEIC, JPG y más · hasta 20 GiB por archivo</small><input id="files" type="file" multiple accept=".mp4,.mov,.m4v,.3gp,.heic,.heif,.jpg,.jpeg,.png,.webp,.avif,.gif,.dng"></label></div>
+        <div id="receive-panel" hidden><p data-i18n="receiveHint">Cuando ella elija un archivo aparecerá aquí. Tú decides si lo recibes y dónde guardarlo.</p><p id="storage-hint" class="small"></p></div>
+        <div id="incoming" class="incoming" hidden><p class="eyebrow" data-i18n="incoming">ARCHIVO POR RECIBIR</p><h3 id="incoming-name"></h3><p id="incoming-size"></p><div class="button-row"><button id="accept" class="primary" data-i18n="accept">Aceptar y elegir dónde guardar</button><button id="reject" class="secondary" data-i18n="reject">Rechazar</button></div></div>
+        <div id="transfer" class="transfer" hidden><div class="transfer-top"><strong id="transfer-name"></strong><span id="transfer-percent">0%</span></div><progress id="progress" max="100" value="0"></progress><p id="transfer-detail" class="small"></p></div>
+        <ul id="completed" class="completed" aria-live="polite"></ul>
+      </section>
+      <div id="session-actions" class="session-actions" hidden><button id="end" class="text-button" data-i18n="end">Terminar conexión y borrar sesión</button><span data-i18n="online">Ambos deben mantener la pantalla y la pestaña abiertas.</span></div>
+    </section>
+    <section class="privacy-section"><div><p class="eyebrow" data-i18n="privacyLabel">PRIVACIDAD CON LÍMITES CLAROS</p><h2 data-i18n="privacyTitle">Los archivos van de un dispositivo al otro.</h2></div><div><p data-i18n="privacyBody">La web no guarda fotos, videos, cuentas ni contraseñas. Tu pareja y tú aprueban la conexión. Los archivos conservan sus metadatos, incluida la ubicación si la contienen.</p>
+      <details><summary data-i18n="limitations">Qué debes saber antes de enviar</summary><p data-i18n="limitsBody">La web y sus proveedores pueden ver visitas e IP; la conexión directa revela su IP al otro dispositivo. El enlace de invitación es un secreto. Algunas redes impiden conectar sin un servidor de retransmisión: prueba otra red o la misma Wi-Fi. No hay almacenamiento mientras la computadora está apagada ni reanudación al cerrar una pestaña.</p><p data-i18n="devicePrivacy">El cifrado no protege un dispositivo comprometido ni lo que hagas con un archivo ya descargado. Usa un chat privado para las invitaciones y protege tu cuenta de GitHub con autenticación de dos factores.</p></details></div></section>
+  </main>
+  <footer><span>entre dos.</span><span data-i18n="footer">Hecho para compartir originales. No para coleccionar tus datos.</span></footer>
+</body></html>
