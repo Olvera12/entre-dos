@@ -52,3 +52,11 @@ La configuración del dueño se valida antes de usarla y en el iPhone al abrir l
 Las credenciales de transporte se incluyen en el fragmento privado de la invitación, sólo para esta sesión, y deben tratarse como secretos de cuota. Deben tener vencimiento y restricciones cuando el proveedor lo permita. Nunca se publican en el repositorio ni se guardan en el navegador. Un relay no convierte el alojamiento del código en una frontera de confianza distinta: la app y dispositivos siguen teniendo acceso al original.
 
 El sondeo de las credenciales estáticas públicas antiguas de Open Relay no obtuvo una ruta en esta computadora; esas credenciales no se incorporaron al producto. El soporte añadido debe probarse con las credenciales vigentes de la cuenta propia, antes de usar archivos privados.
+
+## Lotes y cancelación individual
+
+El protocolo de datos versión 2 identifica cada fragmento mediante UUID binario dentro del mensaje AES-GCM. Se admiten hasta 12 archivos por lote y tres transferencias simultáneas. La aprobación de una carpeta sólo cubre los IDs de los archivos mostrados, nunca lotes posteriores. La memoria de fallback reserva el tamaño de cada archivo activo además de los Blob pendientes, con un máximo total de 256 MiB.
+
+Cada ventana admite hasta 64 fragmentos sin confirmar, con cola de recepción limitada a 256 mensajes. La cancelación conserva marcadores acotados para descartar paquetes ya enviados sin perder el contador de cifrado. Si cancela el receptor, la ventana se reutiliza después de recibir una confirmación ordenada de que el emisor dejó de enviar ese archivo. Los paquetes siguen cifrados y autenticados, incluso si se descartan después de cancelar.
+
+Un archivo parcial se aborta; los archivos nuevos creados por el guardado de lote se eliminan de la carpeta autorizada al cancelar. El selector individual aborta los cambios sin borrar un archivo previo elegido por el usuario. La finalización verificada deshabilita la cancelación cuando ya se está confirmando el guardado. Los nombres existentes en la carpeta se comprueban y reciben un sufijo; no debe modificarse esa carpeta desde otra aplicación durante el guardado. Los archivos completos guardados anteriormente no se borran.

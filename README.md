@@ -9,7 +9,7 @@ Web gratuita para enviar fotos y videos del iPhone a una computadora encendida. 
 ## Publicar gratis en GitHub Pages
 
 1. Crea un **repositorio nuevo**, por ejemplo `entre-dos`. Con GitHub Free, Pages está disponible en repositorios públicos. El código de la app será público; sus archivos e invitaciones no deben estar en el repositorio. [Documentación de GitHub](https://docs.github.com/en/pages/getting-started-with-github-pages/github-pages-limits).
-2. Sube **solamente el contenido de `private-transfer/site/` a la raíz del repositorio nuevo**: `index.html`, `app.mjs`, `security.mjs`, `network.mjs`, `hash.mjs`, `style.css`, `.nojekyll` y la carpeta `i18n/` con ambos JSON. No subas la carpeta del mod, `test-results`, fotos, videos ni enlaces de conexión.
+2. Sube **solamente el contenido de `private-transfer/site/` a la raíz del repositorio nuevo**: `index.html`, `app.mjs`, `security.mjs`, `network.mjs`, `transfer.mjs`, `hash.mjs`, `style.css`, `.nojekyll` y la carpeta `i18n/` con ambos JSON. No subas la carpeta del mod, `test-results`, fotos, videos ni enlaces de conexión.
 3. En **Settings → Pages → Build and deployment**, selecciona **Deploy from a branch**, rama `main`, carpeta `/(root)`, y guarda.
 4. Espera a que GitHub indique la dirección de Pages. Abre esa dirección con **HTTPS**. No necesitas comprar dominio, configurar secretos ni usar GitHub Actions propios.
 5. Protege la cuenta de GitHub con autenticación de dos factores y revisa los cambios de código antes de publicarlos. No añadas publicidad, analítica ni scripts externos a esta app.
@@ -21,8 +21,8 @@ La app usa rutas relativas: funciona también en `https://tu-usuario.github.io/e
 1. **Tú, en la computadora:** abre la web en Chrome o Edge actualizado, pulsa **En mi computadora** y crea una invitación. Deja marcada **Estamos en redes diferentes** cuando corresponda. Comparte la invitación completa por un chat privado. Mantén esa misma pestaña abierta.
 2. **Ella, en el iPhone:** abre la invitación en **Safari**, pulsa **Conectar mi iPhone** y copia su respuesta de conexión. Te devuelve esa respuesta por el mismo chat privado. Si el chat abre un navegador integrado, debe abrir la web en Safari.
 3. **Tú:** pega la respuesta en la pestaña original y pulsa **Conectar dispositivos**. No abras la respuesta en una pestaña nueva. Comprueben que ambos muestran el mismo código de conexión. El enlace es una llave de acceso: sólo se comparte entre ustedes. Expira a los 15 minutos si todavía no conectaron.
-4. **Ella:** pulsa **Elegir videos o fotos** y selecciona los originales desde **Archivos → Explorar**, preferentemente guardados en **En mi iPhone**. Si selecciona varios, se envían uno por uno.
-5. **Tú:** revisa nombre y tamaño, acepta cada archivo y elige dónde guardarlo. Puede rechazar cualquier archivo antes de recibir sus bytes. Espera **Original verificado**: se calcula SHA-256 en ambos dispositivos y se comprueba que coincida antes de finalizar el archivo.
+4. **Ella:** pulsa **Elegir videos o fotos** y selecciona hasta 12 originales desde **Archivos → Explorar**, preferentemente guardados en **En mi iPhone**. Se reciben hasta tres archivos a la vez; el resto espera turno.
+5. **Tú:** revisa nombres y tamaños. Acepta uno por uno, o pulsa **Aceptar lote en una carpeta** y elige una carpeta una vez en Chrome/Edge. Esta aprobación sólo cubre el lote visible. Si el nombre ya existe en la carpeta, se añade un sufijo. Puedes rechazar archivos pendientes o pulsar **Cancelar transferencia** en cualquier archivo activo. Cancelar descarta el parcial y deja continuar los demás; no cierra la conexión. Espera **Original verificado**: se calcula SHA-256 en ambos dispositivos y se comprueba que coincida antes de finalizar el archivo.
 6. Al terminar, pulsa **Terminar conexión y borrar sesión**. Se liberan claves y temporales de la app; los archivos que guardaste en disco permanecen en tu computadora. El chat, el portapapeles y el sistema operativo tienen su propio historial, que este botón no puede borrar.
 
 ## iPhone: conservar el archivo original
@@ -82,3 +82,11 @@ La conexión directa puede fallar aunque ambas personas tengan Internet. El 4 de
 El proveedor puede observar IP, hora y volumen de tráfico cifrado. AES-GCM y DTLS siguen protegiendo el contenido. Las credenciales TURN viajan dentro de la invitación privada: compártanla sólo entre ustedes y no la publiquen, ya que las credenciales también podrían consumir la cuota. No se persisten en localStorage, código publicado o GitHub. El campo se vacía al crear o cerrar la sesión.
 
 Se amplió la espera para descubrir rutas de ocho a veinte segundos y se añadió un error específico si la configuración TURN no produce ninguna ruta de retransmisión. Una clave vencida, cuota agotada o bloqueo completo de red todavía puede impedir conectar. El relay real requiere las credenciales de la cuenta; no se afirma que esté verificado hasta probarlas.
+
+## Lotes, cancelación y rendimiento
+
+Ambos dispositivos deben recargar la web y crear una invitación nueva después de esta actualización del protocolo. Hasta 12 originales por lote, tres simultáneos. Sin acceso a carpetas, se conserva la descarga individual en memoria con un máximo de 256 MiB acumulados y reservados para archivos activos.
+
+La lectura del emisor usa bloques de un MiB; los mensajes cifrados se mantienen menores de 16 KiB. La ventana pasó de ocho a 64 fragmentos por archivo, con confirmación tras escritura cada 16 fragmentos. El vaciado del canal y las confirmaciones despiertan al envío sin esperar un sondeo fijo. La interfaz actualiza el progreso como máximo diez veces por segundo. Son mejoras para reducir esperas de la app; no se promete multiplicar la velocidad de Internet ni del relay. Referencias: https://www.rfc-editor.org/rfc/rfc8831.html y https://developer.mozilla.org/en-US/docs/Web/API/RTCDataChannel/bufferedAmountLowThreshold.
+
+En las pruebas con datos sintéticos se verificaron tres transferencias concurrentes, un cuarto archivo en cola, originales idénticos por SHA-256, conservación de nombres existentes y cancelación individual desde ambos dispositivos sin cerrar la conexión. Los selectores de archivos y carpetas del sistema se simulan: el uso real en Safari, permisos nativos y retransmisión por Metered sigue pendiente de comprobación.
